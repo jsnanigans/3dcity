@@ -37,6 +37,24 @@ const Scene = () => {
         <meshLambertMaterial color={"#0c552c"} />
       </mesh>
 
+      {/* Place 20 Streets on either side of the grid */}
+      {Array.from(Array(40).keys()).map((index) => {
+        let offset = index <= 20 ? -42 : -2;
+        return (
+          <Street
+            key={index}
+            position={[offset + index * 2, 0, 16]}
+            // rotation={[0, Math.PI / 2, 0]}
+            cell={{
+              type: "street",
+              streetType: "horizontal",
+              x: index,
+              y: -1,
+            }}
+          />
+        );
+      })}
+
       {/* Render Grid */}
       {grid.map((row, rowIndex) => {
         return row.map((cell, cellIndex) => {

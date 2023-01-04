@@ -75,17 +75,17 @@ export const selectRandomPointForBuilding = (
 ): { x: number; y: number } | undefined => {
   // place a building next to a street but not on a street or another building
   const possiblePoints = [];
-  for (let i = 0; i < grid.length; i++) {
-    for (let j = 0; j < grid[i].length; j++) {
-      if (grid[i][j] === 0) {
+  for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+      if (get(grid, x, y) === 0) {
         // check if there is a street next to it
         if (
-          grid[i - 1]?.[j] === 1 ||
-          grid[i + 1]?.[j] === 1 ||
-          grid[i]?.[j - 1] === 1 ||
-          grid[i]?.[j + 1] === 1
+          get(grid, x, y - 1) === 1 ||
+          get(grid, x, y + 1) === 1 ||
+          get(grid, x - 1, y) === 1 ||
+          get(grid, x + 1, y) === 1
         ) {
-          possiblePoints.push({ x: j, y: i });
+          possiblePoints.push({ x, y });
         }
       }
     }
@@ -140,34 +140,36 @@ const validateStreet = (grid: Grid, street: Street) => {
   // check all cells on the sides of the street, only one cell can be a street
   if (street.direction === "horizontal") {
     for (let i = 0; i < street.length; i++) {
-      if (grid[street.y - 1]?.[street.x + i] === 1) {
+      const { x, y } = street;
+      if (get(grid, x + i, y - 1) === 1) {
         valid = false;
       }
-      if (grid[street.y + 1]?.[street.x + i] === 1) {
+      if (get(grid, x + i, y + 1) === 1) {
         valid = false;
       }
 
-      if (grid[street.y - 2]?.[street.x + i] === 1) {
+      if (get(grid, x + i, y - 2) === 1) {
         valid = false;
       }
-      if (grid[street.y + 2]?.[street.x + i] === 1) {
+      if (get(grid, x + i, y + 2) === 1) {
         valid = false;
       }
     }
   }
   if (street.direction === "vertical") {
     for (let i = 0; i < street.length; i++) {
-      if (grid[street.y + i]?.[street.x - 1] === 1) {
+      const { x, y } = street;
+      if (get(grid, x - 1, y + i) === 1) {
         valid = false;
       }
-      if (grid[street.y + i]?.[street.x + 1] === 1) {
+      if (get(grid, x + 1, y + i) === 1) {
         valid = false;
       }
 
-      if (grid[street.y + i]?.[street.x - 2] === 1) {
+      if (get(grid, x - 2, y + i) === 1) {
         valid = false;
       }
-      if (grid[street.y + i]?.[street.x + 2] === 1) {
+      if (get(grid, x + 2, y + i) === 1) {
         valid = false;
       }
     }
@@ -176,48 +178,20 @@ const validateStreet = (grid: Grid, street: Street) => {
   // street has to branch out from another street, except for the first street
   if (!isFirstStreet) {
     if (street.direction === "horizontal") {
+      const { x, y } = street;
       if (
-        grid[street.y]?.[street.x - 1] !== 1 &&
-        grid[street.y]?.[street.x + street.length] !== 1
+        get(grid, x - 1, y) !== 1 &&
+        get(grid, x - street.length, y) !== 1
       ) {
         valid = false;
       }
     }
     if (street.direction === "vertical") {
+      const { x, y } = street;
       if (
-        grid[street.y - 1]?.[street.x] !== 1 &&
-        grid[street.y + street.length]?.[street.x] !== 1
+        get(grid, x, y - 1) !== 1 &&
+        get(grid, x, y + street.length) !== 1
       ) {
-        valid = false;
-      }
-    }
-  }
-
-  // street cannot just be an extension of another street
-  if (street.direction === "horizontal") {
-    for (let i = 0; i < street.length; i++) {
-      if (grid[street.y]?.[street.x + i] === 1) {
-        valid = false;
-      }
-
-      if (grid[street.y - 1]?.[street.x + i] === 1) {
-        valid = false;
-      }
-      if (grid[street.y + 1]?.[street.x + i] === 1) {
-        valid = false;
-      }
-    }
-  }
-  if (street.direction === "vertical") {
-    for (let i = 0; i < street.length; i++) {
-      if (grid[street.y + i]?.[street.x] === 1) {
-        valid = false;
-      }
-
-      if (grid[street.y + i]?.[street.x - 1] === 1) {
-        valid = false;
-      }
-      if (grid[street.y + i]?.[street.x + 1] === 1) {
         valid = false;
       }
     }
@@ -266,7 +240,7 @@ export const debugGrid = (grid: Grid) => {
 
 // debugGrid(withStreets);
 
-export type StreetType = "horizontal" | "vertical" | "crossing";
+export type StreetType = "horizontal" | "vertical" | "crossing" | 'end';
 export type CellTypeText = "empty" | "street" | "building" | "tree";
 
 export interface CellDetails {
@@ -277,21 +251,30 @@ export interface CellDetails {
   closestStreetDirection?: Euler;
 }
 
+const get = (grid: Grid, x: number, y: number) => {
+  // row 12, column -1 is a street
+  if (x === -1 && y === 12) return 1;
+  // row 12, column 21 is a street
+  if (x === 21 && y === 12) return 1;
+
+  return grid[y]?.[x];
+}
+
 export const parseGridCell = (grid: Grid, cell: number[]): CellDetails => {
   const [x, y] = cell;
   // const type =
   //   grid[y][x] === 0 ? "empty" : grid[y][x] === 1 ? "street" : "building";
 
   let type: CellTypeText = "empty";
-  if (grid[y][x] === 1) type = "street";
-  if (grid[y][x] === 2) type = "building";
-  if (grid[y][x] === 3) type = "tree";
+  if (get(grid, x, y) === 1) type = "street";
+  if (get(grid, x, y) === 2) type = "building";
+  if (get(grid, x, y) === 3) type = "tree";
 
   const neighbours = [
-    grid[y - 1]?.[x],
-    grid[y + 1]?.[x],
-    grid[y]?.[x - 1],
-    grid[y]?.[x + 1],
+    get(grid, x, y -1),
+    get(grid, x, y + 1),
+    get(grid, x - 1, y),
+    get(grid, x + 1, y)
   ];
 
   let streetType: StreetType | undefined;
@@ -304,15 +287,20 @@ export const parseGridCell = (grid: Grid, cell: number[]): CellDetails => {
     if (neighbours.filter((n) => n === 1).length >= 3) {
       streetType = "crossing";
     }
+
+    // check if road is an end
+    if (neighbours.filter((n) => n === 1).length === 1) {
+      streetType = "end";
+    }
   }
 
   let closestStreetDirection: Euler | undefined;
   if (type === "building") {
     // check which direction the closest street is in
-    if (grid[y - 1]?.[x] === 1) closestStreetDirection = new Euler().fromArray([0, Math.PI, 0]);
-    if (grid[y + 1]?.[x] === 1) closestStreetDirection = new Euler().fromArray([0, 0, 0]);
-    if (grid[y]?.[x - 1] === 1) closestStreetDirection = new Euler().fromArray([0, -Math.PI / 2, 0]);
-    if (grid[y]?.[x + 1] === 1) closestStreetDirection = new Euler().fromArray([0, Math.PI / 2, 0]);
+    if (get(grid, x, y - 1) === 1) closestStreetDirection = new Euler().fromArray([0, Math.PI, 0]);
+    if (get(grid, x, y + 1) === 1) closestStreetDirection = new Euler().fromArray([0, 0, 0]);
+    if (get(grid, x - 1, y) === 1) closestStreetDirection = new Euler().fromArray([0, -Math.PI / 2, 0]);
+    if (get(grid, x + 1, y) === 1) closestStreetDirection = new Euler().fromArray([0, Math.PI / 2, 0]);
   }
 
   return { x, y, type, streetType, closestStreetDirection };
@@ -333,7 +321,7 @@ export const placeRandomTreesOnGrid = (grid: Grid, treeCount = 3): Grid => {
     const x = rnd(0, gridCopy[0].length);
     const y = rnd(0, gridCopy.length);
 
-    if (gridCopy[y]?.[x] === 0) {
+    if (get(gridCopy, x, y) === 0) {
       gridCopy[y][x] = 3;
       addedTrees++;
     }

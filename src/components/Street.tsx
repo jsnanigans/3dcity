@@ -1,6 +1,7 @@
 import { Euler, Vector3 } from "@react-three/fiber";
 import roadLine from '../assets/road-line.jpg'
 import roadBlank from '../assets/road-blank.jpg'
+import roadEnd from '../assets/road-end.png'
 import * as THREE from 'three'
 import { CellDetails } from "../lib/grid";
 
@@ -28,6 +29,11 @@ const Street = (props: StreetProps) => {
   if (cell.streetType === 'crossing') {
     texture = new THREE.TextureLoader().load(roadBlank);
   }
+
+  // use end texture for end
+  if (cell.streetType === 'end') {
+    texture = new THREE.TextureLoader().load(roadEnd);
+  }
   
 
 
@@ -46,7 +52,7 @@ const Street = (props: StreetProps) => {
         <planeGeometry args={size} attach="geometry" />
         {/* <meshLambertMaterial color={color}  /> */}
         {/* add street texture */}
-        <meshLambertMaterial map={texture} />
+        <meshLambertMaterial map={texture} transparent opacity={1} color="yellow" />
         
         {/* <meshStandardMaterial color={props.color ?? '#ad9934'} /> */}
       </mesh>
