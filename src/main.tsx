@@ -27,14 +27,19 @@ const App = () => {
            */}
           <ambientLight intensity={0.6} />
           {/* shadow everywhere */}
-          <pointLight
+          <directionalLight
             castShadow
             position={[-20, 20, 20]}
             // color={rndColor()}
             intensity={2}
-            distance={200}
+            lookAt={[0, 0, 0]}
             shadow-mapSize-width={1024 * 2}
             shadow-mapSize-height={1024 * 2}
+            shadow-camera-left={-40}
+            shadow-camera-right={40}
+            shadow-camera-top={40}
+            shadow-camera-bottom={-40}
+
           />
 
           <OrbitControls

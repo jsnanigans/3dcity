@@ -6,6 +6,8 @@
   3 = tree
 */
 
+import { Euler } from "three";
+
 export type CellType = 0 | 1 | 2 | 3;
 
 export type Grid = CellType[][];
@@ -272,6 +274,7 @@ export interface CellDetails {
   y: number;
   type: CellTypeText;
   streetType?: StreetType;
+  closestStreetDirection?: Euler;
 }
 
 export const parseGridCell = (grid: Grid, cell: number[]): CellDetails => {
@@ -303,7 +306,16 @@ export const parseGridCell = (grid: Grid, cell: number[]): CellDetails => {
     }
   }
 
-  return { x, y, type, streetType };
+  let closestStreetDirection: Euler | undefined;
+  if (type === "building") {
+    // check which direction the closest street is in
+    if (grid[y - 1]?.[x] === 1) closestStreetDirection = new Euler().fromArray([0, Math.PI, 0]);
+    if (grid[y + 1]?.[x] === 1) closestStreetDirection = new Euler().fromArray([0, 0, 0]);
+    if (grid[y]?.[x - 1] === 1) closestStreetDirection = new Euler().fromArray([0, -Math.PI / 2, 0]);
+    if (grid[y]?.[x + 1] === 1) closestStreetDirection = new Euler().fromArray([0, Math.PI / 2, 0]);
+  }
+
+  return { x, y, type, streetType, closestStreetDirection };
 };
 
 

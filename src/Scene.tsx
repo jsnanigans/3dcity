@@ -75,6 +75,8 @@ const Scene = () => {
               <Building
                 key={`${rowIndex}-${cellIndex}`}
                 position={[rowIndex * 2, 0, cellIndex * 2]}
+                cell={cellDetails}
+                // look at road
               />
             );
           }

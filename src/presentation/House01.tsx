@@ -29,6 +29,18 @@ const House01: FC = () => {
         <boxGeometry args={[0.2, 0.5, 0.2]} />
         <meshLambertMaterial color={color} />
       </mesh>
+
+      {/* Main Door */}
+      <mesh receiveShadow position={[0, -0.25, 0.5]}>
+        <boxGeometry args={[0.3, 0.5, 0.05]} />
+        <meshLambertMaterial color={rndColor()} />
+      </mesh>
+
+      {/* Pathway */}
+      <mesh receiveShadow position={[0, -0.5, 0.45]}>
+        <boxGeometry args={[0.5, 0.05, 1.1]} />
+        <meshLambertMaterial color={color} />
+      </mesh>
     </mesh>
   );
 };
