@@ -252,10 +252,8 @@ export interface CellDetails {
 }
 
 const get = (grid: Grid, x: number, y: number) => {
-  // row 12, column -1 is a street
-  if (x === -1 && y === 12) return 1;
-  // row 12, column 21 is a street
-  if (x === 21 && y === 12) return 1;
+  if (x === -1 && y === 8) return 1;
+  if (x === 20 && y === 8) return 1;
 
   return grid[y]?.[x];
 }
