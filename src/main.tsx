@@ -29,23 +29,24 @@ const App = () => {
           {/* shadow everywhere */}
           <directionalLight
             castShadow
-            position={[-20, 20, 20]}
+            position={[-80, 80, 80]}
             // color={rndColor()}
             intensity={2}
             lookAt={[0, 0, 0]}
-            shadow-mapSize-width={1024 * 2}
-            shadow-mapSize-height={1024 * 2}
+            shadow-mapSize-width={1024 * 3}
+            shadow-mapSize-height={1024 * 3}
             shadow-camera-left={-40}
             shadow-camera-right={40}
-            shadow-camera-top={40}
+            shadow-camera-top={30}
             shadow-camera-bottom={-40}
-
+            // shadow-camera-near={0.1}
+            // shadow-camera-far={1000}
           />
 
           <OrbitControls
             // limits angle
-            minPolarAngle={Math.PI * 0.2}
-            maxPolarAngle={Math.PI * 0.35}
+            // minPolarAngle={Math.PI * 0.2}
+            // maxPolarAngle={Math.PI * 0.35}
             // limits distance
             minDistance={10}
             maxDistance={100}

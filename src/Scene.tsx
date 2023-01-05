@@ -1,5 +1,7 @@
-import { Euler, Vector3 } from "@react-three/fiber";
+import { Euler, Vector3 } from "three";
+import { Clouds } from "./Clouds";
 import Building, { BuildingProps } from "./components/Building";
+import Cloud from "./components/Cloud";
 import Street from "./components/Street";
 import Tree from "./components/Tree";
 import {
@@ -28,7 +30,7 @@ const gridHeight = grid.length;
 debugGrid(grid);
 
 const Scene = () => {
-  const offsetWholeScene = [-gridWidth, 0, -gridHeight] as Vector3;
+  const offsetWholeScene = new Vector3(-gridWidth, 0, -gridHeight);
   return (
     <mesh position={offsetWholeScene}>
       {/* Floor mesh */}
@@ -54,6 +56,8 @@ const Scene = () => {
           />
         );
       })}
+
+      <Clouds />
 
       {/* Render Grid */}
       {grid.map((row, rowIndex) => {

@@ -30,8 +30,6 @@ const Building = (props: BuildingProps) => {
         scale={props.scale}
         position={position}
         // align bottom
-        receiveShadow
-        castShadow
       >
         {/* <boxGeometry args={size} attach="geometry" />
         <meshLambertMaterial color={color} /> */}
