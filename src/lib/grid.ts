@@ -293,13 +293,11 @@ export const parseGridCell = (grid: Grid, cell: number[]): CellDetails => {
   }
 
   let closestStreetDirection: Euler | undefined;
-  if (type === "building") {
     // check which direction the closest street is in
     if (get(grid, x, y - 1) === 1) closestStreetDirection = new Euler().fromArray([0, Math.PI, 0]);
     if (get(grid, x, y + 1) === 1) closestStreetDirection = new Euler().fromArray([0, 0, 0]);
     if (get(grid, x - 1, y) === 1) closestStreetDirection = new Euler().fromArray([0, -Math.PI / 2, 0]);
     if (get(grid, x + 1, y) === 1) closestStreetDirection = new Euler().fromArray([0, Math.PI / 2, 0]);
-  }
 
   return { x, y, type, streetType, closestStreetDirection };
 };
