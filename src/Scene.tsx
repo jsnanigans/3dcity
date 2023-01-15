@@ -1,122 +1,85 @@
+import { FC, ReactNode } from "react";
 import { Euler, Vector3 } from "three";
-import { Clouds } from "./Clouds";
-import Building, { BuildingProps } from "./components/Building";
-import Cloud from "./components/Cloud";
-import Street from "./components/Street";
-import Tree from "./components/Tree";
-import {
-  addStreetsToGrid,
-  debugGrid,
-  generateGrid,
-  parseGridCell,
-  placeRandomBuildingOnGrid,
-  placeRandomStreetsOnGrid,
-  placeRandomTreesOnGrid,
-} from "./lib/grid";
+import BasicHouse from "./components/buildings/BasicHouse";
+import Grid, { PlacedGridObject } from "./lib/Grid";
 
-let grid = generateGrid(20, 20);
-grid = addStreetsToGrid(grid, [{
-  direction: 'horizontal',
-  x: 0,
-  y: 8,
-  length: 20
-}]);
-grid = placeRandomStreetsOnGrid(grid, 10);
-grid = placeRandomBuildingOnGrid(grid, 40);
-grid = placeRandomTreesOnGrid(grid, 60);
-const gridWidth = grid[0].length;
-const gridHeight = grid.length;
+const grid = new Grid(100, 60);
+// grid.debug();
 
-debugGrid(grid);
+const gridMatrix = grid.toMatrix();
+
+const Cell = (props: { color?: string }) => {
+  const { color = "#000000" } = props;
+  return (
+    <mesh>
+      <boxGeometry args={[0.2, 0.05, 0.2]} />
+      <meshLambertMaterial color={color} />
+    </mesh>
+  );
+};
+
+const GridElPosition: FC<{ object: PlacedGridObject | null, children: ReactNode }> = ({
+  object,
+  children,
+}) => {
+  if (!object) return null;
+
+  return (
+    <mesh
+      position={new Vector3(object.x, 0, object.y)}
+      onClick={(e) => console.log(object)}
+    >
+      {children}
+    </mesh>
+  );
+};
+
+const GridElement: FC<{ object: PlacedGridObject | null }> = (props) => {
+  const { object } = props;
+
+  switch (object?.obj.name) {
+    case "basicHouse":
+      return <GridElPosition object={props.object}><BasicHouse /></GridElPosition>;
+    default:
+      return null;
+  }
+};
 
 const Scene = () => {
-  const offsetWholeScene = new Vector3(-gridWidth, 0, -gridHeight);
+  const scenePosition = new Vector3(0, 0, 0);
+  // offset position to enter the center of the grid
+  scenePosition.x = -grid.width / 2;
+  scenePosition.z = -grid.height / 2;
+  scenePosition.y = -1;
+
+  const floorPadding = 0;
+  const widthPadded = grid.width + floorPadding;
+  const heightPadded = grid.height + floorPadding;
+
   return (
-    <mesh position={offsetWholeScene}>
-      {/* Floor mesh */}
-      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[4000, 4000]} />
-        <meshLambertMaterial color={"#0c552c"} />
+    <mesh position={scenePosition}>
+      {/* Floor */}
+      <mesh
+        position={
+          new Vector3(
+            widthPadded / 2 - floorPadding / 2,
+            -1,
+            heightPadded / 2 - floorPadding / 2
+          )
+        }
+        rotation={new Euler(-Math.PI / 2, 0, 0)}
+      >
+        <boxGeometry args={[widthPadded, heightPadded, 0.5]} />
+        <meshLambertMaterial color={"#333333"} />
       </mesh>
 
-      {/* Place 20 Streets on either side of the grid */}
-      {Array.from(Array(40).keys()).map((index) => {
-        let offset = index <= 20 ? -42 : -2;
-        return (
-          <Street
-            key={index}
-            position={[offset + index * 2, 0, 16]}
-            // rotation={[0, Math.PI / 2, 0]}
-            cell={{
-              type: "street",
-              streetType: "horizontal",
-              x: index,
-              y: -1,
-            }}
-          />
-        );
-      })}
-
-      <Clouds />
-
-      {/* Render Grid */}
-      {grid.map((row, rowIndex) => {
-        return row.map((cell, cellIndex) => {
-          const cellDetails = parseGridCell(grid, [rowIndex, cellIndex]);
-          if (cellDetails.type === "empty") {
-            // render placeholder
-            return (
-              <mesh
-                key={`${rowIndex}-${cellIndex}`}
-                position={[rowIndex * 2, 0, cellIndex * 2]}
-                onClick={() => {
-                  console.log("clicked on empty cell", rowIndex, cellIndex);
-                }}
-              >
-                <boxGeometry args={[0.1, 0.1, 0.1]} />
-                <meshLambertMaterial
-                  color={"#eeeeee"}
-                  opacity={0}
-                  transparent
-                />
-                {/* text with cell position */}
-              </mesh>
-            );
-          }
-          if (cellDetails.type === "street") {
-            return (
-              <Street
-                key={`${rowIndex}-${cellIndex}`}
-                position={[rowIndex * 2, 0, cellIndex * 2]}
-                cell={cellDetails}
-              />
-            );
-          }
-          if (cellDetails.type === "building") {
-            return (
-              <Building
-                key={`${rowIndex}-${cellIndex}`}
-                position={[rowIndex * 2, 0, cellIndex * 2]}
-                cell={cellDetails}
-                // look at road
-              />
-            );
-          }
-          if (cellDetails.type === "tree") {
-            return (
-              <Tree
-                key={`${rowIndex}-${cellIndex}`}
-                position={[rowIndex * 2, 0, cellIndex * 2]}
-              />
-            );
-          }
-        });
-      })}
-
-      {/* Buildings */}
-      {/* {buildings.map((building, index) => (
-        <Building key={index} {...building} />
-      ))} */}
+      {/* Grid */}
+      {gridMatrix.map((row, x) =>
+        row.map((_, y) => {
+          const object = grid.get(x, y);
+          return <GridElement key={`${y}-${x}`} object={object} />;
+        })
+      )}
     </mesh>
   );
 };

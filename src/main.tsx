@@ -19,7 +19,7 @@ const App = () => {
           onIncline={() => setDpr(2)}
           onDecline={() => setDpr(1)}
         > */}
-          <color attach="background" args={["lightblue"]} />
+          <color attach="background" args={["#061a37"]} />
 
           {/* Light for shadow */}
           {/* <ambientLight intensity={0.25} /> */}
@@ -29,7 +29,7 @@ const App = () => {
           {/* shadow everywhere */}
           <directionalLight
             castShadow
-            position={[-80, 80, 80]}
+            position={[-40, 30, 80]}
             // color={rndColor()}
             intensity={2}
             lookAt={[0, 0, 0]}
@@ -52,17 +52,12 @@ const App = () => {
             maxDistance={100}
           />
 
-          {/* Camera */}
           <OrthographicCamera
             makeDefault
             zoom={30}
-            // top={200}
-            // bottom={-200}
-            // left={200}
-            // right={-200}
-            near={1}
+            near={-100}
             far={1000}
-            position={[30, 40, 50]}
+            position={[400, 1000, 100]}
           />
           <Scene />
         {/* </PerformanceMonitor> */}
